@@ -41,6 +41,7 @@ from apps.ecidadania.proposals.models import Proposal, ProposalSet, \
 from apps.ecidadania.proposals.forms import ProposalForm, VoteProposal, \
         ProposalSetForm, ProposalFieldForm, ProposalSetSelectForm
 from core.spaces.models import Space
+from helpers.cache import get_or_insert_object_in_cache
 
 
 class AddProposal(FormView):
@@ -94,7 +95,7 @@ class ViewProposal(DetailView):
 
     def get_object(self):
         prop_id = self.kwargs['prop_id']
-        return get_object_or_404(Proposal, pk = prop_id)
+        return get_or_insert_object_in_cache(Proposal, prop_id,  pk = prop_id)
 
     def get_context_data(self, **kwargs):
         context = super(ViewProposal, self).get_context_data(**kwargs)
@@ -108,7 +109,8 @@ class ViewProposal(DetailView):
                 self.get_position = i
         context['get_place'] = current_space
         context['support_votes_count'] = support_votes_count[int(self.get_position)].support_votes__count
-        context['location'] = Proposal.objects.get(pk=self.kwargs['prop_id'])
+        prop_id = self.kwargs['prop_id']
+        context['location'] = get_or_insert_object_in_cache(Proposal, prop_id, pk = prop_id)
         return context
 
 
